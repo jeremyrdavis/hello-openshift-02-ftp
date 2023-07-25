@@ -1,56 +1,44 @@
 # hello-openshift-02-ftp
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+This service demos Apache Camel Quarkus Extensions, ftp and Kafka in particular.
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+The service picks up a file from an ftp server, splits it, and puts the resulting messages onto a Kafka topic.
 
-## Running the application in dev mode
+## Running Locally
 
-You can run your application in dev mode that enables live coding using:
-```shell script
-./mvnw compile quarkus:dev
+You will need to start an FTP server.  bogem/ftp is a container that will work.  
+
+It can be started with the following command:
+
+```shell
+docker run -d -v /Users/USERNAME/Desktop/ftp_source:/home/vsftpd \
+    -p 20:20 -p 21:21 -p 47400-47470:47400-47470 \
+    -e FTP_USER=ftpuser \
+    -e FTP_PASS=ftppass \
+    -e PASV_ADDRESS=127.0.0.1 \
+    --name ftp \
+    --restart=always bogem/ftp
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
+Create a file with one greeting per line and drop it in your "ftp_source" folder.
 
-## Packaging and running the application
+To retrieve the file:
 
-The application can be packaged using:
-```shell script
-./mvnw package
-```
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+```shell
+ftp ftpuser@localhost
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+Connected to localhost.
+220 (vsFTPd 3.0.3)
+331 Please specify the password.
+Password:
 
-If you want to build an _über-jar_, execute the following command:
-```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
-```
+'ftppass'
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+ftp> pass
+ftp> cd uploads
+ftp> get file.txt
+ftp> bye
 
-## Creating a native executable
-
-You can create a native executable using: 
-```shell script
-./mvnw package -Dnative
+cat file.txt
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/hello-openshift-02-ftp-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
-
-## Provided Code
-
-### RESTEasy Reactive
-
-Easily start your Reactive RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)

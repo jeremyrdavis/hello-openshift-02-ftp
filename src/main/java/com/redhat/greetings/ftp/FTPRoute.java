@@ -13,6 +13,8 @@ public class FTPRoute extends RouteBuilder {
     public void configure() throws Exception {
 
         from("{{ftp.source}}")
-                .to("ftp://{{ftp.user}}@{{ftp.server}}/uploads?password={{ftp.password}}&passiveMode=true");
+                .split()
+                .tokenize("\n")
+                .to("ftp://{{ftp.user}}@{{ftp.server}}/uploads?password={{ftp.password}}&passiveMode=true&fileName=file-${header.CamelSplitIndex}.txt&delete=true");
     }
 }
